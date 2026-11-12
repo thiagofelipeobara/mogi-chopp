@@ -1,4 +1,3 @@
-
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
@@ -8,6 +7,7 @@ from app.database import db
 from app.models import Cliente, Pedido, Barril, Maquina
 
 from app.services.cliente_service import criar_cliente, listar_clientes
+from app.services.dashboard_service import obter_dados_dashboard
 from app.services.pedido_service import (
     criar_pedido,
     listar_pedidos,
@@ -15,6 +15,7 @@ from app.services.pedido_service import (
 )
 from app.services.barril_service import criar_barril, listar_barris
 from app.services.maquina_service import criar_maquina, listar_maquinas
+
 
 main = Blueprint("main", __name__)
 
@@ -37,45 +38,11 @@ def alterar_status_pedido(pedido_id):
 
 @main.route("/")
 def index():
-    hoje = date.today()
-    inicio_mes = hoje.replace(day=1)
-
-    if hoje.month == 12:
-        proximo_mes = date(hoje.year + 1, 1, 1)
-    else:
-        proximo_mes = date(hoje.year, hoje.month + 1, 1)
-
-    pedidos_mes = Pedido.query.filter(
-        Pedido.data_evento >= inicio_mes,
-        Pedido.data_evento < proximo_mes
-    ).count()
-
-    clientes_total = Cliente.query.count()
-
-    barris_disponiveis = Barril.query.filter_by(
-        status="disponivel",
-        ativo=True
-    ).count()
-
-    maquinas_disponiveis = Maquina.query.filter_by(
-        status="disponivel",
-        ativo=True
-    ).count()
-
-    proximos_pedidos = Pedido.query.filter(
-        Pedido.data_evento >= hoje,
-        Pedido.status != "cancelado"
-    ).order_by(
-        Pedido.data_evento.asc()
-    ).limit(5).all()
+    dados = obter_dados_dashboard()
 
     return render_template(
         "index.html",
-        pedidos_mes=pedidos_mes,
-        clientes_total=clientes_total,
-        barris_disponiveis=barris_disponiveis,
-        maquinas_disponiveis=maquinas_disponiveis,
-        proximos_pedidos=proximos_pedidos
+        **dados
     )
 
 # CLIENTES
