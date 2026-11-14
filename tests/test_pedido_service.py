@@ -1,4 +1,3 @@
-
 from datetime import date
 from decimal import Decimal
 
@@ -9,6 +8,7 @@ from app.services.pedido_service import (
     criar_pedido,
     listar_pedidos,
     atualizar_status_pedido,
+    excluir_pedido,
 )
 
 
@@ -109,3 +109,27 @@ def test_impedir_status_invalido(app):
     with app.app_context():
         with pytest.raises(ValueError, match="Status inválido"):
             atualizar_status_pedido(1, "invalido")
+
+
+def test_excluir_pedido(app):
+    with app.app_context():
+        cliente = criar_cliente("João", "11999999999")
+
+        pedido = criar_pedido({
+            "cliente_id": cliente.id,
+            "data_evento": date(2026, 12, 20),
+            "custo_barril": Decimal("100"),
+            "valor_venda": Decimal("300"),
+        })
+
+        pedido_id = pedido.id
+
+        excluir_pedido(pedido_id)
+
+        assert listar_pedidos() == []
+
+
+def test_impedir_exclusao_de_pedido_inexistente(app):
+    with app.app_context():
+        with pytest.raises(ValueError, match="Pedido não encontrado"):
+            excluir_pedido(999)

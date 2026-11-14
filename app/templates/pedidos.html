@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -48,6 +47,12 @@
     </div>
     {% endif %}
 
+    {% if request.args.get('sucesso') == 'exclusao' %}
+    <div class="alert alert-success">
+        Pedido excluído com sucesso!
+    </div>
+    {% endif %}
+
     <section class="feature-card mb-4" id="novo-pedido">
         <h4 class="mb-3">Novo pedido</h4>
 
@@ -85,6 +90,9 @@
                     <label class="form-label">Despesas adicionais (R$)</label>
                     <input type="number" name="despesas_adicionais"
                            class="form-control" min="0" step="0.01" value="0">
+                    <small class="text-secondary">
+                        Se não houver despesas extras, mantenha zero.
+                    </small>
                 </div>
 
                 <div class="col-12">
@@ -109,6 +117,7 @@
                         <th>Venda</th>
                         <th>Lucro estimado</th>
                         <th>Status</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
 
@@ -136,7 +145,6 @@
                                 class="d-flex gap-2"
                             >
                                 <select name="status" class="form-select form-select-sm">
-
                                     <option value="pendente"
                                         {% if pedido.status == "pendente" %}selected{% endif %}>
                                         Pendente
@@ -156,11 +164,24 @@
                                         {% if pedido.status == "cancelado" %}selected{% endif %}>
                                         Cancelado
                                     </option>
-
                                 </select>
 
-                                <button type="submit" class="btn btn-sm btn-primary">
+                                <button type="submit" class="btn btn-sm btn-primary"
+                                        title="Atualizar status">
                                     <i class="bi bi-check-lg"></i>
+                                </button>
+                            </form>
+                        </td>
+
+                        <td>
+                            <form
+                                action="{{ url_for('main.remover_pedido', pedido_id=pedido.id) }}"
+                                method="POST"
+                                onsubmit="return confirm('Tem certeza de que deseja excluir este pedido? Essa ação não poderá ser desfeita.');"
+                            >
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        title="Excluir pedido">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </form>
                         </td>
@@ -168,7 +189,7 @@
 
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center text-secondary py-4">
+                        <td colspan="6" class="text-center text-secondary py-4">
                             Nenhum pedido cadastrado.
                         </td>
                     </tr>
