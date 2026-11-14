@@ -11,7 +11,8 @@ from app.services.dashboard_service import obter_dados_dashboard
 from app.services.pedido_service import (
     criar_pedido,
     listar_pedidos,
-    atualizar_status_pedido
+    atualizar_status_pedido,
+    excluir_pedido
 )
 from app.services.barril_service import criar_barril, listar_barris
 from app.services.maquina_service import criar_maquina, listar_maquinas
@@ -35,7 +36,20 @@ def alterar_status_pedido(pedido_id):
             erro=str(erro)
         )
 
+@main.route("/pedidos/<int:pedido_id>/excluir", methods=["POST"])
+def remover_pedido(pedido_id):
+    try:
+        excluir_pedido(pedido_id)
+        return redirect(url_for("main.pedidos", sucesso="exclusao"))
 
+    except ValueError as erro:
+        return render_template(
+            "pedidos.html",
+            pedidos=listar_pedidos(),
+            clientes=listar_clientes(),
+            erro=str(erro)
+        )
+    
 @main.route("/")
 def index():
     dados = obter_dados_dashboard()

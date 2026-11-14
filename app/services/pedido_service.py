@@ -41,6 +41,7 @@ def criar_pedido(dados):
 
     return pedido
 
+
 def listar_pedidos():
     return Pedido.query.order_by(Pedido.data_evento).all()
 
@@ -63,6 +64,18 @@ def atualizar_status_pedido(pedido_id, novo_status):
 
     pedido.status = novo_status
 
+    db.session.commit()
+
+    return pedido
+
+
+def excluir_pedido(pedido_id):
+    pedido = db.session.get(Pedido, pedido_id)
+
+    if not pedido:
+        raise ValueError("Pedido não encontrado.")
+
+    db.session.delete(pedido)
     db.session.commit()
 
     return pedido
