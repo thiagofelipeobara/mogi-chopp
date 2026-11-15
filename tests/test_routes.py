@@ -141,3 +141,12 @@ def test_alterar_status_pedido_pela_rota(app, client):
     with app.app_context():
         pedido_atualizado = db.session.get(Pedido, pedido_id)
         assert pedido_atualizado.status == "confirmado"
+
+def test_health_check(app, client):
+    resposta = client.get("/health")
+
+    assert resposta.status_code == 200
+    assert resposta.json == {
+        "status": "ok",
+        "database": "connected"
+    }

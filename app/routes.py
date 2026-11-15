@@ -1,24 +1,51 @@
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    jsonify,
+)
+
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import db
 from app.models import Cliente, Pedido, Barril, Maquina
 
-from app.services.cliente_service import criar_cliente, listar_clientes
 from app.services.dashboard_service import obter_dados_dashboard
+from app.services.cliente_service import criar_cliente, listar_clientes
 from app.services.pedido_service import (
     criar_pedido,
     listar_pedidos,
     atualizar_status_pedido,
-    excluir_pedido
+    excluir_pedido,
 )
 from app.services.barril_service import criar_barril, listar_barris
 from app.services.maquina_service import criar_maquina, listar_maquinas
 
-
 main = Blueprint("main", __name__)
+
+@main.route("/health")
+def health():
+    try:
+        db.session.execute(text("SELECT 1"))
+
+        return jsonify({
+            "status": "ok",
+            "database": "connected"
+        }), 200
+
+    except SQLAlchemyError:
+        db.session.rollback()
+
+        return jsonify({
+            "status": "error",
+            "database": "unavailable"
+        }), 503
 
 @main.route("/pedidos/<int:pedido_id>/status", methods=["POST"])
 def alterar_status_pedido(pedido_id):
